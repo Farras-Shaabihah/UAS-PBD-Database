@@ -1,0 +1,275 @@
+Query UAS
+
+INSERT INTO route(route_id, start_point, end_point, start_operational_time, end_operational_time) VALUES
+    ('1B', 'Condong Catur', 'Bandara Adi Sutjipto', '05.30', '21.30'),
+    ('2B', 'Condong Catur', 'Terminal Ngabean', '05.30', '21.30'),
+    ('3A', 'Terminal Giwangan', 'Condong Catur', '05.30', '21.30'),
+    ('3B', 'Terminal Giwangan', 'Condong Catur', '05.30', '21.30'),
+    ('4A', 'Terminal Giwangan', 'RSUP Sardjito', '05.30', '21.30'),
+    ('4B', 'Terminal Giwangan', 'UGM', '05.30', '21.30'),
+    ('5A', 'Terminal Jombor', 'Ambarukmo', '05.30', '21.30'),
+    ('5B', 'Terminal Jombor', 'Bandara Adi Sutjipto', '05.30', '21.30'),
+    ('6A', 'Park Gamping', 'Pasar Ngabean', '05.30', '21.30'),
+    ('6B', 'Park Gamping', 'Pasar Ngabean', '05.30', '21.30'),
+    ('7', 'Terminal Giwangan', 'Babarsari', '05.30', '21.30'),
+    ('8', 'Terminal Jombor', 'Jogokaryan', '05.30', '21.30'),
+    ('9', 'Terminal Giwangan', 'Terminal Jombor', '05.30', '21.30'),
+    ('10', 'Park Gamping', 'Stadion Kridosono', '05.30', '21.30'),
+    ('11', 'Terminal Giwangan', 'Condong catur', '05.30', '21.30'),
+    ('13', 'Terminal Ngabean (A)', 'Pusat Kuliner Belut Godean', '05.30', '21.30'),
+    ('14', 'Halte TJ Bandara Adisucipto', 'Terminal Pakem', '05.30', '21.30'),
+    ('15', 'Terminal Ngabean (A)', 'Terminal Palbapang (B)', '05.30', '21.30')
+
+INSERT INTO crew(name, gender, age) VALUES
+	('Jono', 'M', 28),
+    ('Paijo', 'M', 25),
+    ('Anisa', 'F', 27),
+    ('Udin', 'M', 30),
+    ('Indah', 'F', 22)
+
+INSERT INTO crew_contact VALUES 
+	('1', '081234567890', 'Condong Catur'),
+	('2', '087846895382', 'Giwangan'),
+	('3', '082439476258', 'Giwangan'),
+	('4', '089435791351', 'Lempuyangan'),
+	('5', '083931591043', 'Jombor');	
+
+INSERT INTO manufacture VALUES 
+	('M1', 'PT. Hino Motors Sales Indonesia', '084826147192', 'Dangdeur', 'hino@gmail.com'),
+    ('M2', 'PT. Duta Cemerlang Motor', '083895619689', 'Masaran', 'dcm@gmail.com'),
+    ('M3', 'PT. Bus Indonesia', '081947986149', 'Ngabean', 'busindonesia@gmail.com'),
+    ('M4', 'PT. Motor Bersinar', '089468278946', 'Dangdeur', 'motorbersinar@gmail.com'),
+    ('M5', 'PT. Pundi Pundi Negara', '084189347584', 'Ngabean', 'pundinegara@gmail.com');
+
+INSERT INTO service_provider VALUES 
+	('P1', 'PT. Hino Motors Sales Indonesia', 'Dangdeur', '084826147192', 'hino@gmail.com'),
+    ('P2', 'PT. Duta Cemerlang Motor', 'Masaran', '083895619689', 'dcm@gmail.com'),
+    ('P3', 'PT. Bus Indonesia', 'Ngabean', '081947986149', 'busindonesia@gmail.com'),
+    ('P4', 'PT. Motor Bersinar', 'Dangdeur', '089468278946', 'motorbersinar@gmail.com'),
+    ('P5', 'PT. Pundi Pundi Negara', 'Ngabean', '084189347584', 'pundinegara@gmail.com');
+
+INSERT INTO scedule(bus_id, route_id, driver, conductor) VALUES 
+	('B1', '3B', 1, 2),
+    ('B2', '3A', 3, 4),
+    ('B5', '10', 5, 3),
+    ('B3', '1B', 4, 5),
+    ('B4', '3A', 2, 1);
+
+INSERT INTO bus VALUES 
+	('B1', 'M1', '2024-07-07', 'W04D-TN', 100),
+    ('B2', 'M1', '2024-07-08', 'W04D-TN', 90),
+    ('B3', 'M2', '2024-06-04', 'W04D-TN', 250),
+    ('B4', 'M3', '2024-03-01', 'W04D-TN', 1000),
+    ('B5', 'M1', '2024-06-20', 'W04D-TN', 190);
+
+
+
+FUNCTION
+
+FUNCTION WITHOUT PARAMETER:
+DELIMITER //
+CREATE FUNCTION f_all_bus_status_inactive()
+RETURNS INT
+BEGIN
+	DECLARE insertedID INT;
+	UPDATE bus_status SET status = 'Inactive' WHERE status != 'Not Available Anymore';
+	SET insertedID = 1;
+	RETURN insertedID;
+END; //
+DELIMITER ;
+
+FUNTION WITH PARAMETER(ATLEAST 2 PARAMETER):
+
+DELIMITER //
+CREATE FUNCTION f_salary_change(id INT, new_salary INT)
+RETURNS varchar(7)
+BEGIN
+	DECLARE execution varchar(7);
+    UPDATE crew SET salary = new_salary WHERE crew_id = id;
+    SET execution = 'Success';
+    RETURN execution;
+END; //
+DELIMITER ;
+
+
+
+
+
+PROCEDURE(INCLUDING CONTROL FLOW)
+
+PROCEDURE WITHOUT PARAMETER:
+DELIMITER //
+CREATE PROCEDURE sp_trip_detail()
+BEGIN
+	SELECT tl.trip_log_id, tl.bus_id, s.route_id, s.driver, s.conductor, tl.start_time, tl.end_time, tl.total_passenger, tl.total_distance,
+    CASE
+    	WHEN tl.total_passenger <= 25 THEN 'Low Quota Met'
+        WHEN tl.total_passenger <= 50 THEN 'Average Quota Met'
+        WHEN tl.total_passenger > 50 THEN 'High Quota Met'
+        ELSE 'Not Identified'
+    END AS level_passenger
+    FROM trip_log AS tl
+    JOIN bus AS b USING(bus_id)
+    JOIN scedule AS s USING(scedule_id)
+    ORDER BY tl.trip_log_id;
+END; //
+DELIMITER ;
+
+PROCEDURE WITH PARAMETER(ATLEAST 2 PARAMETER):
+DELIMITER //
+CREATE PROCEDURE sp_crew_salary_condition(IN id INT, OUT salary_level varchar(10))
+BEGIN
+	SET @salary = (SELECT salary FROM crew WHERE crew_id = id);
+	IF (@salary <= 2000000) THEN SET salary_level = 'Low';
+    ELSEIF (@salary <= 2500000) THEN SET salary_level = 'Medium';
+    ELSEIF (@salary > 2500000) THEN SET salary_level = 'High';
+    ELSE SET salary_level = 'NA';
+    END IF;
+END; //
+DELIMITER ;
+
+calling the sp:
+SET @salary_level = '';
+SET @id = 1;
+CALL sp_crew_salary_condition(@id, @salary_level);
+SELECT crew_id, name, years_worked, salary, @salary_level AS salary_level FROM crew WHERE crew_id=@id;
+
+
+
+
+TRIGGER
+
+BEFORE INSERT:
+DELIMITER //
+CREATE TRIGGER update_km_count BEFORE INSERT ON trip_log
+FOR EACH ROW
+BEGIN
+	UPDATE bus SET km_count = km_count + new.total_distance WHERE bus_id = new.bus_id;
+END; //
+DELIMITER ;
+
+
+AFTER INSERT:
+DELIMITER //
+CREATE TRIGGER insert_new_bus_status AFTER INSERT ON bus
+FOR EACH ROW
+BEGIN
+	INSERT INTO bus_status(bus_id, status) VALUES (new.bus_id, 'Available');
+END; //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER update_bus_status AFTER INSERT ON service_log
+FOR EACH ROW
+BEGIN
+	UPDATE bus_status SET status = 'In Service' WHERE bus_id = new.bus_id;
+    UPDATE bus SET km_count = 0 WHERE bus_id = new.bus_id;
+END; //
+DELIMITER ;
+
+
+BEFORE UPDATE:
+DELIMITER //
+CREATE TRIGGER reset_bus_status BEFORE UPDATE ON bus
+FOR EACH ROW
+BEGIN
+	IF EXISTS(SELECT * FROM bus WHERE km_count > 5000) THEN
+	UPDATE bus_status SET status = "Need Service" WHERE bus_id = new.bus_id;
+    END IF;
+END; //
+DELIMITER ;
+
+
+AFTER UPDATE:
+DELIMITER //
+CREATE TRIGGER revise_km_count AFTER UPDATE ON trip_log
+FOR EACH ROW
+BEGIN
+	UPDATE bus SET km_count = km_count - old.total_distance + new.total_distance WHERE bus_id = new.bus_id;
+END; //
+DELIMITER ;
+
+
+BEFORE DELETE:
+DELIMITER //
+CREATE TRIGGER delete_crew_contact BEFORE DELETE ON crew
+FOR EACH ROW
+BEGIN
+	DELETE FROM crew_contact WHERE crew_id = old.crew_id;
+END; //
+DELIMITER ;
+
+
+AFTER DELETE:
+DELIMITER //
+CREATE TRIGGER nonactive_bus_status AFTER DELETE ON bus
+FOR EACH ROW
+BEGIN
+	UPDATE bus_status SET status = 'Not Available Anymore' WHERE bus_id = old.bus_id;
+END; //
+DELIMITER ;
+
+
+
+
+
+
+
+INDEX
+
+CREATE TABLE WITH INDEX:
+CREATE TABLE bus(
+	bus_id varchar(20) PRIMARY KEY,
+    manufacture_id varchar(20) NOT NULL,
+    start_operating_date date NOT NULL,
+    machine_type varchar(20) NOT NULL,
+    km_count int NOT NULL,
+    INDEX(start_operating_date, machine_type)
+);
+
+CREATE INDEX:
+CREATE INDEX order_crew ON crew(name, gender);
+
+ALTER TABLE:
+ALTER TABLE manufacture ADD INDEX(name, address);
+
+
+
+
+
+
+
+VIEW
+
+HORIZONTAL VIEW:
+CREATE VIEW v_giwangan_start AS
+SELECT * FROM route WHERE start_point = 'Terminal Giwangan';
+
+VERTICAL VIEW:
+CREATE VIEW v_route_initial AS
+SELECT route_id FROM route;
+
+VIEW ON VIEW:
+CREATE VIEW v_giwangan_start_condongcatur_end AS 
+SELECT * FROM v_giwangan_start WHERE end_point = 'Condong Catur' 
+WITH CASCADED CHECK OPTION;
+
+
+
+
+DATABASE SECURITY
+
+CREATE ATLEAST 3 USER:
+CREATE USER user1@localhost IDENTIFIED BY 'password', user2@localhost IDENTIFIED BY '1234567890', user3@localhost IDENTIFIED BY 'admin1234';
+
+CREATE ATLEAST 3 ROLE:
+CREATE ROLE finance, marketing, operations;
+
+PRIVILEGE TO ACCESS 1 TABLE(USER):
+GRANT INSERT ON trans_service.service_log TO 'user1'@'localhost';
+
+PRIVILEGE TO ACCESS 1 VIEW(USER):
+GRANT SELECT ON trans_service.v_giwangan_start TO 'user2'@'localhost';
+
+PRIVILEGE TO ACCESS 1 PROCEDURE(ROLE):
+GRANT ALL ON trans_service.sp_trip_detail TO operations;
